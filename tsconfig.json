@@ -8,11 +8,13 @@
     "paths": {
       "@/*": ["./src/*"]
     },
+    "resolveJsonModule": true,
     "types": [
       "node"
     ],
     "strict": true,
     "outDir": "./dist",
+    "allowSyntheticDefaultImports": true,
     "skipLibCheck": true
   },
   "exclude": ["node_modules"]

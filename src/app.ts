@@ -1,32 +1,21 @@
-import type { PinoLogger } from 'hono-pino'
-import { OpenAPIHono } from '@hono/zod-openapi'
-import { logger } from 'hono/logger'
-import { customLogger } from './middleware/custom-logger'
-import { logger as pinoLogger } from './middleware/pino-logger'
-import notFound from './middleware/utils/not-found'
-import onError from './middleware/utils/on-error'
+import type { AppOpenAPI } from './lib/types/app-types'
+import createApp from '@/lib/create-app'
+import configureOpenAPI from '@/lib/openapi-configuration'
+import index from '@/routes/index.route'
 
-interface AppBindings {
-  Variables: {
-    logger: PinoLogger
-  }
-}
+const app = createApp()
 
-const app = new OpenAPIHono<AppBindings>()
-// Use any of the following logger middlewares
-  // .use(
-  //   logger(customLogger),
-  // )
-  .use(
-    pinoLogger(),
-  )
+const routes = [index]
+
+configureOpenAPI(app as AppOpenAPI)
+
+routes.forEach((route) => {
+  app.route('/', route)
+})
 
 app.get('/', (c) => {
   c.var.logger.info('Root endpoint accessed')
   return c.text('Hello Hono!')
 })
-
-app.notFound(notFound)
-app.onError(onError)
 
 export default app
