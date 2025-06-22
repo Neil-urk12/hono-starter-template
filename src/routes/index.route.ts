@@ -1,21 +1,20 @@
 import { createRoute, z } from '@hono/zod-openapi'
 import { createRouter } from '@/lib/create-app'
+import jsonContent from '@/middleware/utils/jsonContentSchema'
+import * as httpStatusCodes from '@/openapi/http-status-codes'
 
 const router = createRouter()
   .openapi(createRoute({
+    tags: ['Index'],
     method: 'get',
     path: '/',
     responses: {
-      200: {
-        content: {
-          'application/json': {
-            schema: z.object({
-              message: z.string(),
-            }),
-          },
-        },
-        description: 'Root route of the API',
-      },
+      [httpStatusCodes.OK]: jsonContent(
+        z.object({
+          message: z.string(),
+        }),
+        'Root route of the API',
+      ),
     },
   }), (c) => {
     return c.json({
