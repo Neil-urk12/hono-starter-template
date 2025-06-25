@@ -1,6 +1,7 @@
 import { createRoute, z } from '@hono/zod-openapi'
 import { apiItemsSchema, insertItemApiSchema, insertItemSchema } from '@/database/schema'
 import createErrorSchema from '@/middleware/utils/create-error-schema'
+import IdParamsSchema from '@/middleware/utils/id-params-validator'
 import jsonContent, { jsonContentRequired } from '@/middleware/utils/json-content'
 import * as httpStatusCodes from '@/openapi/http-status-codes'
 
@@ -40,6 +41,37 @@ export const createItem = createRoute({
   },
 })
 
+export const getItem = createRoute({
+  path: '/items/{id}',
+  method: 'get',
+  request: {
+    params: IdParamsSchema,
+  },
+  tags,
+  responses: {
+    [httpStatusCodes.OK]: jsonContent(
+      apiItemsSchema,
+      'List of items',
+    ),
+    [httpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent (
+      createErrorSchema(insertItemSchema),
+      'Invalid Id error',
+    ),
+    [httpStatusCodes.NOT_FOUND]: jsonContent (
+      z.object({
+        message: z.string(),
+      }).openapi({
+        example: {
+          message: 'Item not found',
+        },
+      }),
+      'Item not found',
+    ),
+  },
+})
+
 export type ListRoute = typeof listOfItems
 
 export type CreateRoute = typeof createItem
+
+export type GetOneRoute = typeof getItem

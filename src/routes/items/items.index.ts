@@ -5,5 +5,6 @@ import * as routes from '@/routes/items/items.routes'
 const router = createRouter()
   .openapi(routes.listOfItems, handlers.list)
   .openapi(routes.createItem, handlers.create)
+  .openapi(routes.getItem, handlers.getOne)
 
 export default router
