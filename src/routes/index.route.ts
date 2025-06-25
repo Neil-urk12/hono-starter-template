@@ -1,6 +1,6 @@
 import { createRoute, z } from '@hono/zod-openapi'
 import { createRouter } from '@/lib/create-app'
-import jsonContent from '@/middleware/utils/jsonContentSchema'
+import jsonContent from '@/middleware/utils/json-content'
 import * as httpStatusCodes from '@/openapi/http-status-codes'
 
 const router = createRouter()
