@@ -1,4 +1,4 @@
-import type { AppBindings } from '@/lib/types/app-types'
+import type { AppBindings, AppOpenAPI } from '@/lib/types/app-types'
 import { OpenAPIHono } from '@hono/zod-openapi'
 import { logger } from 'hono/logger'
 import { customLogger } from '@/middleware/custom-logger'
@@ -28,4 +28,11 @@ export function createRouter() {
     strict: false,
     defaultHook,
   })
+}
+
+export function createTestApp(router: AppOpenAPI) {
+  const testApp = createRouter()
+  testApp.route('/', router)
+
+  return testApp
 }

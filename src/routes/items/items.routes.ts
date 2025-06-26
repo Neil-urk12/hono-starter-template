@@ -1,5 +1,5 @@
 import { createRoute, z } from '@hono/zod-openapi'
-import { apiItemsSchema, insertItemApiSchema, insertItemSchema } from '@/database/schema'
+import { apiItemsSchema, insertItemApiSchema, insertItemSchema, patchItemApiSchema } from '@/database/schema'
 import createErrorSchema from '@/middleware/utils/create-error-schema'
 import IdParamsSchema from '@/middleware/utils/id-params-validator'
 import jsonContent, { jsonContentRequired } from '@/middleware/utils/json-content'
@@ -70,8 +70,74 @@ export const getItem = createRoute({
   },
 })
 
+export const patch = createRoute({
+  path: '/items/{id}',
+  method: 'patch',
+  request: {
+    params: IdParamsSchema,
+    body: jsonContentRequired(
+      patchItemApiSchema,
+      'The item to update',
+    ),
+  },
+  tags,
+  responses: {
+    [httpStatusCodes.OK]: jsonContent(
+      apiItemsSchema,
+      'The updated item',
+    ),
+    [httpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
+      createErrorSchema(patchItemApiSchema)
+        .or(createErrorSchema(IdParamsSchema)),
+      'Invalid Id or item error',
+    ),
+    [httpStatusCodes.NOT_FOUND]: jsonContent (
+      z.object({
+        message: z.string(),
+      }).openapi({
+        example: {
+          message: 'Item not found',
+        },
+      }),
+      'Item not found',
+    ),
+  },
+})
+
+export const remove = createRoute({
+  path: '/items/{id}',
+  method: 'delete',
+  request: {
+    params: IdParamsSchema,
+  },
+  tags,
+  responses: {
+    [httpStatusCodes.NO_CONTENT]: {
+      description: 'Item deleted',
+    },
+    [httpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent (
+      createErrorSchema(IdParamsSchema),
+      'Invalid Id error',
+    ),
+    [httpStatusCodes.NOT_FOUND]: jsonContent (
+      z.object({
+        message: z.string(),
+      }).openapi({
+        example: {
+          message: 'Item not found',
+        },
+      }),
+      'Item not found',
+    ),
+  },
+})
+
 export type ListRoute = typeof listOfItems
 
 export type CreateRoute = typeof createItem
 
 export type GetOneRoute = typeof getItem
+
+export type PatchRoute = typeof patch
+
+export type DeleteRoute = typeof remove

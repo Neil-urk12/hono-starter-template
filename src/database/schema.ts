@@ -37,6 +37,8 @@ export const insertItemSchema = createInsertSchema(items)
     updatedAt: true,
   })
 
+export const patchItemsSchema = insertItemSchema.partial()
+
 export const apiItemsSchema = z.object({
   id: z.number(),
   name: z.string(),
@@ -50,4 +52,10 @@ export const insertItemApiSchema = z.object({
   name: z.string().min(1, 'Name cannot be empty'),
   description: z.string().min(1, 'Description cannot be empty'),
   available: z.boolean(),
+})
+
+export const patchItemApiSchema = z.object({
+  name: z.string().min(1, 'Name cannot be empty').optional(),
+  description: z.string().min(1, 'Description cannot be empty').optional(),
+  available: z.boolean().optional(),
 })
