@@ -6,7 +6,7 @@ A modern, type-safe REST API built with Hono, TypeScript, and SQLite. Features c
 
 - **Modern Stack**: Built with [Hono](https://hono.dev/) - a fast, lightweight web framework
 - **Type Safety**: Full TypeScript support with Zod validation
-- **Database**: SQLite with [Drizzle ORM](https://orm.drizzle.team/) for type-safe database operations
+- **Database**: [Turso](https://turso.tech/) (LibSQL) with [Drizzle ORM](https://orm.drizzle.team/) for type-safe database operations
 - **API Documentation**: Auto-generated OpenAPI 3.0 specs with [Scalar](https://scalar.com/) UI
 - **Testing**: Comprehensive test suite with Vitest
 - **Logging**: Structured logging with Pino
@@ -50,6 +50,12 @@ A modern, type-safe REST API built with Hono, TypeScript, and SQLite. Features c
    NODE_ENV=development
    PORT=3000
    LOG_LEVEL=info
+   DATABASE_URL=libsql:turso.io?authToken=YOUR_TOKEN
+   ```
+
+   **For local development**, you can use a local SQLite file:
+
+   ```env
    DATABASE_URL=file:./local.db
    ```
 
@@ -222,13 +228,13 @@ npx drizzle-kit studio
 
 ## Environment Variables
 
-| Variable              | Description                          | Default       | Required |
-| --------------------- | ------------------------------------ | ------------- | -------- |
-| `NODE_ENV`            | Environment mode                     | `development` | No       |
-| `PORT`                | Server port                          | `3000`        | No       |
-| `LOG_LEVEL`           | Logging level                        | `info`        | No       |
-| `DATABASE_URL`        | Database connection URL              | -             | Yes      |
-| `DATABASE_AUTH_TOKEN` | Database auth token (for production) | -             | No       |
+| Variable              | Description                             | Default       | Required        |
+| --------------------- | --------------------------------------- | ------------- | --------------- |
+| `NODE_ENV`            | Environment mode                        | `development` | No              |
+| `PORT`                | Server port                             | `3000`        | No              |
+| `LOG_LEVEL`           | Logging level                           | `info`        | No              |
+| `DATABASE_URL`        | Turso database URL or local SQLite file | -             | Yes             |
+| `DATABASE_AUTH_TOKEN` | Turso authentication token              | -             | Yes (for Turso) |
 
 ## Architecture
 
@@ -274,8 +280,16 @@ CMD ["npm", "start"]
 ### Environment Setup
 
 - Set `NODE_ENV=production`
-- Configure `DATABASE_URL` for your production database
-- Set `DATABASE_AUTH_TOKEN` if using Turso or similar
+- Configure `DATABASE_URL` with your Turso database URL
+- Set `DATABASE_AUTH_TOKEN` with your Turso authentication token
+
+### Turso Setup
+
+1. Create a Turso account at [turso.tech](https://turso.tech/)
+2. Install Turso CLI: `curl -sSfL https://get.tur.so/install.sh | bash`
+3. Create a database: `turso db create your-database-name`
+4. Get your database URL: `turso db show your-database-name --url`
+5. Create an auth token: `turso db tokens create your-database-name`
 
 ## Contributing
 
@@ -293,6 +307,7 @@ This project is licensed under the MIT License.
 ## Links
 
 - [Hono Documentation](https://hono.dev/)
+- [Turso Database](https://turso.tech/)
 - [Drizzle ORM](https://orm.drizzle.team/)
 - [Zod Validation](https://zod.dev/)
 - [Scalar API Documentation](https://scalar.com/)
