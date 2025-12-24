@@ -1,48 +1,43 @@
+import type { Context, MiddlewareHandler } from 'hono'
+import type { Env } from 'hono-pino'
+import type { AppBindings } from '@/lib/types/app-types'
 import { pinoLogger } from 'hono-pino'
 import pino from 'pino'
 import * as PinoPretty from 'pino-pretty'
-import env from './env'
 
 /**
- * Creates a configured Pino logger middleware for Hono applications.
- * 
- * This function sets up structured logging using Pino with environment-aware
- * configuration. In development, it uses pretty-printing for human-readable
- * logs, while in production it outputs structured JSON logs for better
- * machine processing.
- * 
- * Features:
- * - Environment-aware log formatting (pretty in dev, JSON in production)
- * - Configurable log levels via LOG_LEVEL environment variable
- * - Automatic request ID generation using crypto.randomUUID()
- * - Integration with Hono's middleware system
- * 
- * @returns Configured Hono middleware function for logging
- * 
+ * Creates a Pino logger middleware for Hono applications.
+ *
+ * This function sets up a logging middleware that integrates with Pino,
+ * providing structured logging with request IDs and environment-specific
+ * formatting (pretty printing in development).
+ *
+ * @returns A Hono middleware handler that adds logging functionality
+ *
  * @example
  * ```typescript
- * import { logger } from '@/middleware/pino-logger'
- * 
- * const app = new Hono()
- * app.use(logger())
+ * import createApp from '@/lib/create-app'
+ * import logger from '@/middleware/pino-logger'
+ *
+ * const app = createApp()
+ * app.use(logger()) // Add logging middleware
+ *
+ * // Access logger in handlers via c.var.logger
+ * app.get('/example', (c) => {
+ *   c.var.logger.info('Request received')
+ *   return c.json({ message: 'Hello World' })
+ * })
  * ```
- * 
- * Log levels (from most to least verbose):
- * - trace: Very detailed debug information
- * - debug: Debug information
- * - info: General information (default)
- * - warn: Warning messages
- * - error: Error messages
- * - fatal: Fatal error messages
- * - silent: No logging
  */
-export function logger() {
-  return pinoLogger({
+function logger() {
+  return ((c, next) => pinoLogger({
     pino: pino({
-      level: env.LOG_LEVEL || 'info',
-    }, env.NODE_ENV === 'production' ? undefined : PinoPretty.PinoPretty()),
+      level: c.env.LOG_LEVEL || 'info',
+    }, c.env.NODE_ENV === 'production' ? undefined : PinoPretty.PinoPretty()),
     http: {
       reqId: () => crypto.randomUUID(),
     },
-  })
+  })(c as unknown as Context<Env>, next)) satisfies MiddlewareHandler<AppBindings>
 }
+
+export default logger

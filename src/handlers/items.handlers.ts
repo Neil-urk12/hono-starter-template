@@ -1,17 +1,19 @@
 import type { AppRouteHandler } from '@/lib/types/app-types'
 import type { CreateRoute, DeleteRoute, GetOneRoute, ListRoute, PatchRoute } from '@/routes/items/items.routes'
 import { eq } from 'drizzle-orm'
-import db from '@/config/db'
+import { createDb } from '@/config/db'
 import { items } from '@/database/schema'
 import * as httpStatusCodes from '@/openapi/http-status-codes'
 import * as httpStatusPhrases from '@/openapi/http-status-phrases'
 
 export const list: AppRouteHandler<ListRoute> = async (c) => {
+  const { db } = createDb(c.env)
   const items = await db.query.items.findMany()
   return c.json(items)
 }
 
 export const create: AppRouteHandler<CreateRoute> = async (c) => {
+  const { db } = createDb(c.env)
   const item = c.req.valid('json')
 
   const [insertedItem] = await db.insert(items).values(item).returning()
@@ -20,6 +22,7 @@ export const create: AppRouteHandler<CreateRoute> = async (c) => {
 
 export const getOne: AppRouteHandler<GetOneRoute> = async (c) => {
   const { id } = c.req.valid('param')
+  const { db } = createDb(c.env)
 
   const item = await db.query.items.findFirst({
     where(fields, operators) {
@@ -36,6 +39,7 @@ export const getOne: AppRouteHandler<GetOneRoute> = async (c) => {
 
 export const patch: AppRouteHandler<PatchRoute> = async (c) => {
   const { id } = c.req.valid('param')
+  const { db } = createDb(c.env)
   const updates = c.req.valid('json')
 
   const [item] = await db.update(items)
@@ -52,7 +56,7 @@ export const patch: AppRouteHandler<PatchRoute> = async (c) => {
 
 export const remove: AppRouteHandler<DeleteRoute> = async (c) => {
   const { id } = c.req.valid('param')
-
+  const { db } = createDb(c.env)
   const result = await db.delete(items)
     .where(eq(items.id, id))
 

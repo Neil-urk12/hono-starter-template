@@ -1,4 +1,3 @@
-import type { ZodError } from 'zod'
 import { config } from 'dotenv'
 import { expand } from 'dotenv-expand'
 import { z } from 'zod'
@@ -64,26 +63,16 @@ const EnvSchema = z.object({
  * TypeScript type representing the validated environment configuration.
  * Inferred from the EnvSchema to ensure type safety.
  */
-export type Env = z.infer<typeof EnvSchema>
+export type Environment = z.infer<typeof EnvSchema>
 
-/**
- * Validated environment configuration object.
- * This variable is populated during module initialization and exported
- * as the default export for use throughout the application.
- */
-// eslint-disable-next-line import/no-mutable-exports
-let env: Env
+export function parseEnv(data: any) {
 
-try {
-  // eslint-disable-next-line node/prefer-global/process
-  env = EnvSchema.parse(process.env)
-}
-catch (e) {
-  const error = e as ZodError
-  console.error('Invalid environment variables')
-  console.error(error.flatten().fieldErrors)
-  // eslint-disable-next-line node/prefer-global/process
-  process.exit(1)
+  const { data: env, error } = EnvSchema.safeParse(data)
+
+  if (error) {
+    throw new Error(JSON.stringify(error))
+  }
+
+  return env
 }
 
-export default env
